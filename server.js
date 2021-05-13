@@ -11,8 +11,8 @@ app.use(express.urlencoded({
 
 app.use(express.static('www'));
 
-var port = 3000;
-var dbURL = 'mongodb://localhost:27017/todolist';
+var port = process.env.PORT || 3000;
+var dbURL = process.env.mongoURL || 'mongodb://localhost:27017/todolist';
 
 app.get('/', (req, res)=>{
     res.sendFile('index.html');
