@@ -1,9 +1,8 @@
-var express = require('express');
-var app = express();
-var mongoose = require('mongoose');
+const express = require('express');
+const app = express();
+const mongoose = require('mongoose');
 
-var port = 3000;
-var dbURL = //ADD DB URL HERE;
+const Task = require('./model/Task.js');
 
 app.use(express.json());
 app.use(express.urlencoded({
@@ -12,9 +11,49 @@ app.use(express.urlencoded({
 
 app.use(express.static('www'));
 
+var port = 3000;
+var dbURL = 'mongodb://localhost:27017/todolist';
+
 app.get('/', (req, res)=>{
     res.sendFile('index.html');
 });
+
+app.post('/addTask', (req, res)=>{
+    // const title = req.body.title;
+    // const body = req.body.body;
+    const {title, body} = req.body;
+    task = new Task({
+        title: title,
+        body: body
+    });
+    task.save();
+    res.redirect('/');
+});
+
+app.get('/getTasks', (req, res)=>{
+    Task.find({}, (err, docs) =>{
+        if (err) throw err;
+        res.send(docs);
+    })
+})
+
+app.get('/deleteTask/:id', (req, res)=>{
+    var id = req.params.id;
+    Task.findOneAndDelete({_id: id }, (err, docs)=>{
+        if (err) throw err;
+        res.redirect('/');
+    })
+})
+
+app.get('/completeTask/:id', (req, res)=>{
+    var id = req.params.id;
+    Task.findOne({_id: id }, (err, doc)=>{
+        if (err) throw err;
+        doc.completed = true;
+        doc.save();
+        res.redirect('/');
+    })
+})
 
 mongoose.connect(dbURL, {
     useUnifiedTopology: true,
@@ -26,5 +65,5 @@ mongoose.connect(dbURL, {
 });
 
 app.listen(port, ()=>{
-    console.log(`Listening on Port ${port}`)
-} );
+    console.log(`Connect on Port: ${port}`);
+})
